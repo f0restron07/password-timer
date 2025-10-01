@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Credentials Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .time-display {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .current-time {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .timezone {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.locked {
+            background: #fee;
+            color: #c33;
+            border: 2px solid #fcc;
+        }
+
+        .status.unlocked {
+            background: #efe;
+            color: #3c3;
+            border: 2px solid #cfc;
+        }
+
+        .credentials-box {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .credentials-box.show {
+            display: block;
+        }
+
+        .cred-item {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .cred-label {
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .cred-value {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            border: 1px solid #ddd;
+            word-break: break-all;
+        }
+
+        .locked-message {
+            display: none;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .locked-message.show {
+            display: block;
+        }
+
+        .countdown {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn:active {
+            background: #4450b8;
+        }
+
+        .warning-text {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Daily Credentials Portal</h1>
+        <p class="subtitle">Secure access window: 9:00 AM - 9:15 AM IST</p>
+
+        <div class="time-display">
+            <div class="current-time" id="currentTime">--:--:--</div>
+            <div class="timezone">Indian Standard Time (IST)</div>
+        </div>
+
+        <div class="status" id="statusBox">
+            <span id="statusText">Checking...</span>
+        </div>
+
+        <div class="credentials-box" id="credentialsBox">
+            <div class="icon">✅</div>
+            <h2 style="color: #667eea; margin-bottom: 20px;">Today's Credentials</h2>
+            
+            <div class="cred-item">
+                <span class="cred-label">Username</span>
+                <div class="cred-value" id="username">secure_user_2025</div>
+                <button class="copy-btn" onclick="copyToClipboard('username')">Copy</button>
+            </div>
+
+            <div class="cred-item">
+                <span class="cred-label">Password</span>
+                <div class="cred-value" id="password">--</div>
+                <button class="copy-btn" onclick="copyToClipboard('password')">Copy</button>
+            </div>
+
+            <div class="cred-item">
+                <span class="cred-label">API Key</span>
+                <div class="cred-value" id="apikey">API-SECURE-2025-ACCESS</div>
+                <button class="copy-btn" onclick="copyToClipboard('apikey')">Copy</button>
+            </div>
+
+            <div class="warning-text">
+                ⚠️ Password available for <span id="remainingTime">--</span> only
+            </div>
+        </div>
+
+        <div class="locked-message" id="lockedMessage">
+            <div class="icon">🔒</div>
+            <h2 style="color: #c33; margin-bottom: 15px;">Credentials Locked</h2>
+            <p>Credentials are only available<br><strong>Tomorrow between 9:00 AM and 9:15 AM IST</strong></p>
+            <p style="margin-top: 15px;">Please return during the 15-minute access window to view your credentials.</p>
+            <div class="countdown" id="countdown">--</div>
+        </div>
+    </div>
+
+    <script>
+        // Encoded password (Base64 + XOR encryption)
+        const enc = 'ciFJfjViKVFJNWUnfFg1Kit+aGJnYigpM1hVUTQ7MTtePkc5QDc6Lm85NzR7QU5bdUQ=';
+        
+        function dec(e) {
+            const b = atob(e);
+            let r = '';
+            for (let i = 0; i < b.length; i++) {
+                r += String.fromCharCode(b.charCodeAt(i) ^ 42);
+            }
+            return r;
+        }
+
+        function getISTTime() {
+            const now = new Date();
+            const istOffset = 5.5 * 60 * 60 * 1000;
+            const istTime = new Date(now.getTime() + istOffset);
+            return istTime;
+        }
+
+        function getTomorrowDate() {
+            const ist = getISTTime();
+            const tomorrow = new Date(ist);
+            tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+            return tomorrow.toISOString().split('T')[0];
+        }
+
+        function checkAccessTime() {
+            const istTime = getISTTime();
+            const targetDate = getTomorrowDate();
+            const currentDate = istTime.toISOString().split('T')[0];
+            
+            // Only allow access on tomorrow's date
+            if (currentDate !== targetDate) {
+                return false;
+            }
+            
+            const hours = istTime.getUTCHours();
+            const minutes = istTime.getUTCMinutes();
+            
+            // Only between 9:00 AM and 9:15 AM IST
+            if (hours === 9 && minutes >= 0 && minutes < 15) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function updateDisplay() {
+            const istTime = getISTTime();
+            
+            // Update time display
+            const timeStr = istTime.toISOString().split('T')[1].split('.')[0];
+            document.getElementById('currentTime').textContent = timeStr;
+
+            const isAvailable = checkAccessTime();
+            const statusBox = document.getElementById('statusBox');
+            const statusText = document.getElementById('statusText');
+            const credentialsBox = document.getElementById('credentialsBox');
+            const lockedMessage = document.getElementById('lockedMessage');
+
+            if (isAvailable) {
+                // Show unlocked state
+                statusBox.className = 'status unlocked';
+                statusText.textContent = '✓ Credentials Available';
+                credentialsBox.classList.add('show');
+                lockedMessage.classList.remove('show');
+
+                // Decode and display password
+                const pwd = dec(enc);
+                document.getElementById('password').textContent = pwd;
+
+                // Calculate remaining time
+                const minutes = istTime.getUTCMinutes();
+                const seconds = istTime.getUTCSeconds();
+                const remainingMinutes = 14 - minutes;
+                const remainingSeconds = 59 - seconds;
+                document.getElementById('remainingTime').textContent = 
+                    `${remainingMinutes}m ${remainingSeconds}s`;
+            } else {
+                // Show locked state
+                statusBox.className = 'status locked';
+                statusText.textContent = '✗ Access Denied';
+                credentialsBox.classList.remove('show');
+                lockedMessage.classList.add('show');
+
+                // Calculate countdown to tomorrow 9:00 AM
+                const tomorrow = new Date(istTime);
+                tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+                tomorrow.setUTCHours(9, 0, 0, 0);
+
+                const diff = tomorrow - istTime;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('countdown').textContent = 
+                    `Next unlock in: ${hours}h ${minutes}m ${seconds}s`;
+            }
+        }
+
+        function copyToClipboard(fieldId) {
+            const text = document.getElementById(fieldId).textContent;
+            if (text && text !== '--') {
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = event.target;
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                });
+            }
+        }
+
+        // Update every second
+        updateDisplay();
+        setInterval(updateDisplay, 1000);
+
+        // Security: Clear password from memory when locked
+        setInterval(() => {
+            if (!checkAccessTime()) {
+                document.getElementById('password').textContent = '--';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
